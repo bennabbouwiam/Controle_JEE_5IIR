@@ -247,6 +247,162 @@ contenant les méthodes de récupération de données et en précisant l’annot
 ![image](https://user-images.githubusercontent.com/80289154/206293541-b8a55c05-f32e-4171-b88e-ce61d6a064d8.png)
 
 
+### Partie 8 :  Déployer le serveur keycloak 
+
+- Téléchargement et installation de keycloak
+
+![image](https://user-images.githubusercontent.com/80289154/206307810-961fa534-5378-4d19-b8a7-cd1b13fe251d.png)
+
+- Démarrer keycloak en mode build
+  Commande : "kc.bat start-dev" => démarrer la version de keycloak basée sur le framework Quarkus
+  
+  ![image](https://user-images.githubusercontent.com/80289154/206308012-15eb06bf-7ed5-4733-8868-2cabfd7b4856.png)
+  
+  ![image](https://user-images.githubusercontent.com/80289154/206308070-925d7f4e-070b-47a1-94ea-4bd2bd41a470.png)
+  
+- Console d’administration : créer un admin  
+
+![image](https://user-images.githubusercontent.com/80289154/206308245-1539b893-9353-49ea-bbd9-a289abf36021.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206308261-e3360314-7d92-49f3-9cc6-9496fd368982.png)
+
+- Après la création d’un admin on accède à la console d’administration :
+  - S’authentifier
+
+![image](https://user-images.githubusercontent.com/80289154/206308515-47f63d9d-fe67-4c0f-aff6-af5314e9b6b0.png)
+
+- Accéder à la console
+
+![image](https://user-images.githubusercontent.com/80289154/206308568-a4066452-418c-4dd1-b2c7-c9a19bf6c1b8.png)
+
+- Créer un realm : il va contenir les applications à sécuriser 
+
+![image](https://user-images.githubusercontent.com/80289154/206308623-60f24314-b38c-4b5e-9ba6-b7a84f6c920f.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206308648-ad71d065-5c09-4e9c-8fce-0a4168032225.png)
+
+- Créer un client à sécuriser 
+
+![image](https://user-images.githubusercontent.com/80289154/206308708-2cfa6705-a186-40ac-afc7-8a5d91c34199.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206308742-39c85890-e6b1-4b72-8a7d-220ed80569d6.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206308772-d726dadb-7820-4d6a-9654-87b2c680f6ee.png)
+
+- Quelques accès setting URLs :
+   - Path de l’application Angular 
+
+![image](https://user-images.githubusercontent.com/80289154/206308873-517fe4eb-d2ab-40b6-aaea-5b95b0aa49bc.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206308898-e85d8ff7-a17a-4cdb-9704-71c1c4375077.png)
+
+- Créer des utilisateurs qui ont le droit d’accéder à l’application sécurisée (clientID)
+
+![image](https://user-images.githubusercontent.com/80289154/206309015-a8600bc4-6a0f-4646-b922-4eb9b4380a8d.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206309056-9375ce44-e980-4b73-8529-a602f2d54aaf.png)
+
+- Attribuer à cet utilisateur un mot de passe 
+
+![image](https://user-images.githubusercontent.com/80289154/206309164-c7adb94a-6eec-45ec-9c2e-abeb090fe478.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206309197-47924b41-3a8f-4063-8bfc-37e946032368.png)
+
+- Créer un 2ème utilisateur => même façon
+
+![image](https://user-images.githubusercontent.com/80289154/206309325-782522de-7444-413a-a276-f14d95c8fb04.png)
+
+- Créer des rôles : ADMIN et USER
+
+![image](https://user-images.githubusercontent.com/80289154/206309460-2f208c5b-7fd5-4739-ba4f-54240c8502b3.png)
+
+- Affecter les rôles aux utilisateurs 
+
+![image](https://user-images.githubusercontent.com/80289154/206309504-b935345b-ebf5-410d-82b1-d0c422f066a8.png)
+
+- User1 = USER 
+
+![image](https://user-images.githubusercontent.com/80289154/206309575-84c7db07-c49c-4888-9f34-cc4d363aab59.png)
+
+- User2 = USER + ADMIN
+
+![image](https://user-images.githubusercontent.com/80289154/206309625-c970434e-722f-4d46-a1ae-32343a298d04.png)
+
+- Tester les différents modes d'authentification avec Postman en montrant les contenus de Access_Token, Refresh_Token :
+      - Test d’authentification :
+Pour s’authentifier, supposons qu’il s’agit d’une application mobile 
+Dans une application mobile on ne peut pas faire des redirections vers keycloak, c’est à nous qu’on doit créer notre propre formulaire et c’est à partir de cet formulaire on va envoyer une requête à keycloak (username+mdp), et il va nous donner le id_token.
+
+URL : realm setting
+
+![image](https://user-images.githubusercontent.com/80289154/206309856-6b9c8357-bc29-4c04-b3d0-cf2eef9abf21.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206309874-938af746-7ecf-4762-a419-db6a7325ed01.png)
+
+Postman :
+
+![image](https://user-images.githubusercontent.com/80289154/206309985-2728d7c4-6e16-4e14-9ddb-449835136b9f.png)
+
+- Récupérer le id_token après l’envoi de la requête 
+
+![image](https://user-images.githubusercontent.com/80289154/206310120-94d42c68-dc5d-4e5c-82d8-c0400aad5bd4.png)
+    
+   => Access_tocken => objet Json jwt 
+   
+![image](https://user-images.githubusercontent.com/80289154/206310257-bdbc2542-41da-46a2-aae9-f3fd6d769367.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206310282-85b1c8e5-25d0-469d-a691-8edb5f189e32.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206310315-e8f7fcc0-4e28-460b-80eb-232483c2ed63.png)
+
+- Demander un autre access_token 
+    - S’authentifier mais avec refresh _token pour avoir un nouveau access _token 
+
+![image](https://user-images.githubusercontent.com/80289154/206310415-dda7fab5-4379-459c-8c3c-1ba4a5864551.png)
+
+ => 3 méthodes pour s’authentifier : 
+1/ s’authentifier via un mot de passe
+2/ s’authentifier via un refresh_token tant qu’il n’est pas encore expiré
+3/ s’authentifier en utilisant Client_ID et client secret 
+
+- S’authentifier en utilisant Client_ID et client secret 
+
+![image](https://user-images.githubusercontent.com/80289154/206310575-9315ed06-ced8-4e2e-8b71-31af8939f7d8.png)
+
+   => Authentifier l’app et non pas le user, donc l’app doit envoyer un client id et client secret
+   => Ceci est utile pour les apps backend et non pas les apps frontend 
+   
+![image](https://user-images.githubusercontent.com/80289154/206310700-992dd890-007f-4aae-b9a8-3c961b6e37fc.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206310726-5dcd5732-c23a-445c-9d04-540715f05705.png)
+
+- On aura un access token avec longue durée sans refresh token
+
+![image](https://user-images.githubusercontent.com/80289154/206310846-df12262a-f058-40cc-bc1b-413460f6ca55.png)
+
+- Error => on doit désactiver le secret client
+
+![image](https://user-images.githubusercontent.com/80289154/206310951-d6927846-6d6a-48f0-85b0-d997931e3720.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206310967-eb0f8b68-7dbc-4149-b03e-608a8b82df35.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206310980-a0fcb024-a986-4cb2-947e-c085f6040549.png)
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+  
+  
 
 
 
