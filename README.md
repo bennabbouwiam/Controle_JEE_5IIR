@@ -388,6 +388,124 @@ Postman :
 
 ![image](https://user-images.githubusercontent.com/80289154/206310980-a0fcb024-a986-4cb2-947e-c085f6040549.png)
 
+### Partie 9 : Sécuriser les micro-services et le frontend angular en déployant les adaptateurs Keycloak
+
+-	Préparer l’environnement Keycloak :
+  -	Démarrer keycloak avec la comande "kc.bat start-dev"
+  -	Accéder à la console d’administration après la création d’un administrateur
+  - Créer un realm qui va comporter les applications à sécuriser, les users, les rôles …
+
+![image](https://user-images.githubusercontent.com/80289154/206784102-87827083-95a7-4f5e-ab99-99205b65dc8d.png)
+
+•	Créer les clients : les applications à sécuriser
+
+![image](https://user-images.githubusercontent.com/80289154/206784154-45884508-9617-4403-91de-3f16d8b0da00.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206784215-d6d64d54-ced5-477a-aab5-895bf4f59be6.png)
+
+•	Créer les users et les attribuer des mots de passe permanents et non pas temporaires
+
+![image](https://user-images.githubusercontent.com/80289154/206784253-d2249580-7887-41a7-ac17-c6258818e4df.png)
+
+•	 Créer les rôles 
+
+![image](https://user-images.githubusercontent.com/80289154/206784323-aa5008c8-d887-4f12-be05-d3e8ceb05d31.png)
+
+•	Affecter les rôles aux utilisateurs
+              User1 => USER
+              User2 => ADMIN+USER
+              User3 => ADMIN+USER+MANAGER
+
+-	Tester avec Postman
+
+![image](https://user-images.githubusercontent.com/80289154/206784392-a72fa557-6357-4660-94df-a00972cc94db.png)
+
+•	1ère méthode de s’authentification : s’authentifier avec un mot de passe et récupérer l’access token
+      Access_token => reste un objet jwt 
+      
+![image](https://user-images.githubusercontent.com/80289154/206784518-3556d312-09da-4ae3-9173-14f1bb3f21d8.png)
+
+       => Access_token : reste un objet jwt  
+
+![image](https://user-images.githubusercontent.com/80289154/206784626-291090a6-7b8c-4444-b070-6bd594f0a822.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206784651-0aa32f04-f1b4-4cb4-8d45-c8a6909dec70.png)
+
+-	Changer les paramètres d’expiration de token : "Access token lifespan 10"
+
+![image](https://user-images.githubusercontent.com/80289154/206784736-8cc8b522-2857-434f-b71e-4d3f149e87b8.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206784754-23c0ed5f-2af1-49ae-94dc-a446448845b1.png)
+
+-	Verification avec user2
+
+![image](https://user-images.githubusercontent.com/80289154/206784798-6a606831-52ce-4965-96e4-1f1cacc9e835.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206784826-9a33b1d9-ef43-43df-bfdc-a5b8453d84ee.png)
+
+•	2ème méthode d’authentification : s’authentifier avec refresh_token
+
+![image](https://user-images.githubusercontent.com/80289154/206784886-a3a7d945-ea8d-48c1-ad7b-ff1d8331ee68.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206784907-9a368d50-dc06-46fc-94d8-4c547b9bc52a.png)
+
+-	Sécuriser le 1er micro service des produits 
+
+![image](https://user-images.githubusercontent.com/80289154/206784952-f6598647-ea07-401d-ba75-3d9fd2adbf85.png)
+
+•	Exécution : la liste des produits 
+
+![image](https://user-images.githubusercontent.com/80289154/206784990-f311019a-045b-4d8d-b697-e8e4d1d3dca9.png)
+
+-	Ajouter les dépendances : spring security + adaptateur keycloak keycloak-spring-boot-starter
+-	Créer la configuration keycloak : @KeycloakConfiguration
+-	Fichier de configuration properties : ajuster les paramètres de configuration pour adapter keycloak 
+-	Adapter cherche toujours le fichier keycloak.json pour les paramètres de configuration, c’est pour cela qu’on va créer 
+  une classe de configuration pour ne pas avoir cet changement et prendre en compte la configuration qui se trouve dans le fichier properties
+-	Après la configuration on accède aux produits et voilà le résultat :
+
+![image](https://user-images.githubusercontent.com/80289154/206785086-0aeda8f5-717a-4645-ad47-36ca1d19939b.png)
+
+![image](https://user-images.githubusercontent.com/80289154/206785108-ba54fef0-bd2f-4628-b93f-a8579b961be5.png)
+
+•	Une fois authentifié on peut accéder à la liste des produits
+
+![image](https://user-images.githubusercontent.com/80289154/206785155-06c55702-7262-46c6-8db9-fa48a776f226.png)
+
+•	On veut afficher par défaut une fois authentifié le username, c’est pour cela qu’on doit ajuster et ajouter 
+  quelques paramètres de configuration dans le fichier properties
+  
+  ![image](https://user-images.githubusercontent.com/80289154/206785227-2114ce74-3e85-486c-b12c-c93e279eb07c.png)
+
+-	Sécuriser le 2ème micro service des fournisseurs
+
+•	Les mêmes classes de configuration (package sec)
+
+![image](https://user-images.githubusercontent.com/80289154/206785278-761c4e70-e967-4f78-9bd5-377d2d22bb8f.png)
+
+•	Pour générer le token, keycloak va utiliser public key, c’est pour cela qu’il faut ajouter des paramètres 
+  de configuration dans le fichier applicationProperties
+  
+  ![image](https://user-images.githubusercontent.com/80289154/206785324-7d6df07e-cd28-441a-a759-196cb597513f.png)
+
+  •	Le JWT
+  
+  ![image](https://user-images.githubusercontent.com/80289154/206785366-feaed4e9-29b3-42cd-a249-e11036a74f3d.png)
+
+  •	Pour qu’un micro service peut communiquer avec un autre, il doit envoyer le token à l’utilisateur
+  
+  ![image](https://user-images.githubusercontent.com/80289154/206785417-a104d5b3-7bc5-4d6b-901e-c70050205284.png)
+
+  •	Accéder à la liste des fournisseurs 
+  
+  ![image](https://user-images.githubusercontent.com/80289154/206785464-ca0f3340-637d-4ee2-a425-e944a58433f7.png)
+
+  ![image](https://user-images.githubusercontent.com/80289154/206785494-f44c0d4f-114b-4827-9de3-447d4f5dc037.png)
+
+
+
+
+
 
  
 
