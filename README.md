@@ -501,6 +501,216 @@ Postman :
   ![image](https://user-images.githubusercontent.com/80289154/206785464-ca0f3340-637d-4ee2-a425-e944a58433f7.png)
 
   ![image](https://user-images.githubusercontent.com/80289154/206785494-f44c0d4f-114b-4827-9de3-447d4f5dc037.png)
+  
+  
+  ------------------------------------------------------------------------------------------------------
+  # Partie Kafka : Event Driven Architecture avec KAFKA et Spring Cloud Streams
+  ## Enoncé 
+  
+1. Intégration du Bocker KAFKA
+2. Création d'un micro-service qui permet de produire aléatoirement des factures et de les publier dans un Topic KAFKA
+3. Permettre au Micro-service déjà développé BILLING-SERVICE de consommer les factures publier dans le Topic KAFKA et de les enregistrer dans sa base de données
+4. Créer un micro-service Data-Analytics-Service qui utilise l'API KAFKA Streams pour effectuer du Real Time Stream Processing en consommant le streams de facture publiées dans le Topic KAFKA
+5. Créer une Page Frontend qui permet de présenter en temps réel les courbes qui montrent les résultats produits par le service du Data Analytics
+6. Déployer l'ensemble des services de l'application en utilisant des conteneur Docker : Créer les images Docker pour chaque service et et le fichier Docker-compose.yml qui permet de déployer toute l'application
+
+## Architecture version finale 
+
+![image](https://user-images.githubusercontent.com/80289154/219857184-996b033a-daa7-4537-9c56-2625d0b5672d.png)
+
+![image](https://user-images.githubusercontent.com/80289154/219857322-d397d046-e40e-4647-b2c4-f19f5a23797b.png)
+
+- téléchargement de kafka 
+
+![image](https://user-images.githubusercontent.com/80289154/219857348-377abaea-5bc7-46dd-a37f-75aed443a4ba.png)
+
+![image](https://user-images.githubusercontent.com/80289154/219857358-e354b18f-f849-4047-b7e9-c60e871635be.png)
+
+- Démarrer Zookeeper
+
+- Démarrer Kafka-server
+
+- Tester avec Kefka-console-producer et kafka-console-consumer
+
+=> Lancer le serveur Zookeeper :
+
+> bin\windows\zookeeper-server-start.bat config/zookeeper.properties
+
+![image](https://user-images.githubusercontent.com/80289154/219857474-6fdb7824-557f-45d8-922f-1bc10f1f8b05.png)
+
+=> Lancer le Broker KAFKA : 
+
+> bin\windows\kafka-server-start.bat config/server.properties
+
+![image](https://user-images.githubusercontent.com/80289154/219857493-d87d4694-50e7-4b23-871e-c503e0626cf9.png)
+
+- Tester avec Kafka-console-producer et kafka-console-consumer
+
+=> lancer kafka-console-consumer : 
+
+> start bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic R1
+
+![image](https://user-images.githubusercontent.com/80289154/219857513-1fcbe9fb-ff11-4cfe-b741-689c0097be3f.png)
+
+=> lancer kafka-console-producer : 
+
+> start bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic R1
+
+![image](https://user-images.githubusercontent.com/80289154/219857540-35aceea3-e524-4637-8c28-2e016d24593a.png)
+
+->  Testing 
+
+![image](https://user-images.githubusercontent.com/80289154/219857563-8e8dddd6-bff6-4dff-af8d-4b5aa3c91fa9.png)
+
+- Réaliser ue application qui permet de gérer les événements qui se produisent dans des pages à travers Spring cloud streams 
+
+- Créer la classe PageEvent : 
+
+- Créer un Rest Controller pour envoyer et publier des messages dans topic kafka suite à un évenement qui va se produire dans l’interface web de l’app (UI)
+
+Pour pouvoir publier des messages dans topic kafka, il existe 3 méthodes :
+ 
+       -> utiliser kafka template (@kafkaListener)
+       
+       -> utiliser spring cloud streams (message channel @streamListener)
+       
+       -> utiliser spring cloud streams functions
+
+=> Tester 
+
+![image](https://user-images.githubusercontent.com/80289154/219857707-9938d5dc-f42b-4aae-a69f-00ec597a1b27.png)
+
+![image](https://user-images.githubusercontent.com/80289154/219857716-9bb6be83-b5af-4806-b7aa-8beb11ab589e.png)
+
+- 2ème cas : 
+
+Au lieu d’avoir un consumer créé à partir du cmd, au lieu de consommer le message en utilisant kafka console, on va créer une app consumer qui va écouter le topic R1 et de lire ces messages et les afficher dans l’app. 
+
+-> Pour créer un consumer : soit en utilisant l’annotation @MessageListener qui est définie sur SpringCloudStream
+->	Soit en exploitant la programmation fonctionnelle
+
+Pour se faire : on va créer un service avec l’annotation @Service => créer une fonction avec l’annotation @Bean qui va retourner un consumer qui va consommer des objets de type EventPage
+
+Pour que tout cela fonctionne, par défaut SpringCloudStream va avoir un topic qui porte le même nom du bean généré (de la fonction) (de la page) => il faut aller au fichier de configuration properties (configurer le nom du topic) : 
+
+    #nom du topic par défaut 
+    
+    #pageEventConsumer-in-0
+
+Si on ne veut pas un nom par défaut on doit le configurer (faire de binding ou de la correspondance) dans le fichier en utilisant : 
+
+    spring.cloud.stream.bindings.pageEventConsumer-in-0.destination=R1
+    
+Le nom est R1 du topic
+
+Résumé : pour déployer un consommateur, on crée un service qui comporte une fonction qui va retourner un consumer qui attend le message en input et sui consomme des objets de type EventPage
+
+=> Tester 
+
+![image](https://user-images.githubusercontent.com/80289154/219857889-d617b0e6-8f20-4595-adc8-aa2660ca89eb.png)
+
+![image](https://user-images.githubusercontent.com/80289154/219857898-619b3050-ca57-45d7-a1c3-84ef3c7da33f.png)
+
+- 3ème cas : créer un ProducerPoller
+
+Créer un fournisseur de données qui va produire des messages dans topic R2, pour chaque seconde on va envoyer des messages vers topic kafka => ajouter une fonction qui retourne un supplier 
+
+R1 : test
+
+![image](https://user-images.githubusercontent.com/80289154/219857952-1d949598-5ffc-46b4-be0d-ed85d9f49ca3.png)
+
+R2 : test => Lancer un consumer 
+
+![image](https://user-images.githubusercontent.com/80289154/219857973-ab79c19e-1fa7-4c0a-b8b3-0badd8a7424e.png)
+
+On peut régler le temps de pull de message 
+
+![image](https://user-images.githubusercontent.com/80289154/219857989-1c254e37-a2a3-48be-8853-fade5b244b18.png)
+
+Un flux de données qui arrivent : 
+
+Si on veut analyser ce flux de données en temps réel = traitement de type batch
+
+Framework spring batch (traitement par lot)
+
+Traiter les données en temps réel pour prendre des décisions, c’est du stream processing = Kafka streams 
+
+- 4ème cas : consumer&Producer 
+
+	Une app dans laquelle on va recevoir un flux en input, l’app va le traiter, et va produire un autre Stream en output qui va vers un autre topic 
+ 
+	Lire sur -> R2 et Produire en output sur R3 
+ 
+Ça se passe toujours sur la classe @service (traitement)
+
+=> Tester : Lancer un consumer sur topic R3
+
+![image](https://user-images.githubusercontent.com/80289154/219858121-a847f60f-254c-4cb4-aea1-82d902fd7ec7.png)
+
+Produire sur R1 avec RestController => lire de R1 (input sur R1) et output sur R3
+
+![image](https://user-images.githubusercontent.com/80289154/219858141-9d884b14-66d9-4b6f-9977-abb068fe4e33.png)
+
+![image](https://user-images.githubusercontent.com/80289154/219858150-a13a3436-8ef4-4f8c-b514-84f720d31a1e.png)
+
+Produire sur R2 avec SupplierPoller => lire de R2 (input sur R2) et output sur R3
+
+![image](https://user-images.githubusercontent.com/80289154/219858166-ad111c0e-b08e-4943-b417-80e1de3d854d.png)
+
+- 5ème cas : kafka Streams
+
+Traitement de données en temps réel = traitement côté client 
+
+Steam processing = pas de traitement distribué (cluster distribué) = avoir besoin d’une API légère capable de faire des traitements rapidement
+
+Bach processing # stream processing 
+
+Principe technique : ajouter une fonction dans le service qui va recevoir en input un Stream, lire les données qui sont produites dans le topic R2
+
+=> recevoir un flux d’enregistrement (data record : clé/value) dans la topic R2 (le topic dont lequel on va consommer les données), et produire un output un autre flux
+
+d’enregistrements qui contient les statistiques = KTable
+
+Lire de R2 et output sur R4
+
+=> Tester 
+
+![image](https://user-images.githubusercontent.com/80289154/219861697-c996c3ee-990e-4042-a6a0-7ff2fa72bdad.png)
+
+Lancer un consumer dans R4 pour voir la sortie : 
+
+![image](https://user-images.githubusercontent.com/80289154/219862139-d05deeeb-4610-49d1-94a4-14b2a1d576d9.png)
+
+![image](https://user-images.githubusercontent.com/80289154/219862566-ae380524-9224-4174-b3ed-e7885290e368.png)
+
+Résultat final :
+
+![image](https://user-images.githubusercontent.com/80289154/219862902-e076fa2b-7b36-4b25-9a9f-ac10b4737d37.png)
+
+![image](https://user-images.githubusercontent.com/80289154/219863003-6c56c1a5-521a-42c5-8e88-850118f9a40d.png)
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
 
 
 
